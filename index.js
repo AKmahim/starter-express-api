@@ -21,6 +21,16 @@ const s3 = new AWS.S3();
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage });
 
+
+// Enable CORS for all routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:5500');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
+
 // Define a route for uploading an image to S3
 app.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) {
