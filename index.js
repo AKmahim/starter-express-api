@@ -70,7 +70,7 @@ app.get('/image/:id', async (req, res) => {
       'Content-Type': 'image/jpeg', // Adjust the content type based on your image format
       'Content-Length': image.Body.length,
     });
-    res.end(image.Body);
+    res.end(image.Body); 
   } catch (error) {
     console.error('Error retrieving image from S3:', error);
     return res.status(404).json({ message: 'Image not found.' });
