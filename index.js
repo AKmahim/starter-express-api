@@ -28,7 +28,7 @@ app.use((req, res, next) => {
     'http://127.0.0.1:5500',
     'https://xri.com.bd',
     'https://akmahim.github.io/AR-PhotoBooth/',
-    'https://akmahim.github.io/'
+    'https://akmahim.github.io'
     // Add more allowed origins as needed
   ];
 
