@@ -22,9 +22,20 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage });
 
 
-// Enable CORS for all routes
+// Enable CORS for specific origins
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:5500');
+  const allowedOrigins = [
+    'http://127.0.0.1:5500',
+    'https://xri.com.bd',
+    // Add more allowed origins as needed
+  ];
+
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
@@ -70,7 +81,7 @@ app.get('/image/:id', async (req, res) => {
       'Content-Type': 'image/jpeg', // Adjust the content type based on your image format
       'Content-Length': image.Body.length,
     });
-    res.end(image.Body); 
+    res.end(image.Body);
   } catch (error) {
     console.error('Error retrieving image from S3:', error);
     return res.status(404).json({ message: 'Image not found.' });
