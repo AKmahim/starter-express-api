@@ -90,6 +90,30 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
+app.get('/all-photo-ids', async (req, res) => {
+  try {
+    const listObjectsResponse = await s3.listObjectsV2({
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Prefix: 'images/', // Adjust the folder path as needed
+    }).promise();
+
+    const photoIds = listObjectsResponse.Contents.map((object) => {
+      // Extract the file ID from the object key
+      const fileName = object.Key.split('/').pop();
+      const fileId = fileName.split('.')[0];
+      return fileId;
+    });
+
+    res.json({ photoIds });
+  } catch (error) {
+    console.error('Error listing photo IDs from S3:', error);
+    return res.status(500).json({ message: 'Failed to list photo IDs.' });
+  }
+});
+
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
