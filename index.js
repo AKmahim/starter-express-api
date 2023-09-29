@@ -110,6 +110,49 @@ app.get('/all-photo-ids', async (req, res) => {
   }
 });
 
+app.delete('/delete-all', async (req, res) => {
+  try {
+    const listObjectsResponse = await s3.listObjectsV2({
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Prefix: 'images/', // Adjust the folder path as needed
+    }).promise();
+
+    const objectsToDelete = listObjectsResponse.Contents.map((object) => ({
+      Key: object.Key,
+    }));
+
+    await s3.deleteObjects({
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Delete: {
+        Objects: objectsToDelete,
+        Quiet: false,
+      },
+    }).promise();
+
+    return res.json({ message: 'All images deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting all images from S3:', error);
+    return res.status(500).json({ message: 'Failed to delete all images.' });
+  }
+});
+app.delete('/delete/:id', async (req, res) => {
+  const fileId = req.params.id;
+  const fileName = `${fileId}.jpg`; // Assuming all images are in JPG format
+
+  try {
+    await s3.deleteObject({
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Key: `images/${fileName}`, // Adjust the folder path as needed
+    }).promise();
+
+    return res.json({ message: `Image with ID ${fileId} deleted successfully.` });
+  } catch (error) {
+    console.error(`Error deleting image with ID ${fileId} from S3:`, error);
+    return res.status(500).json({ message: `Failed to delete image with ID ${fileId}.` });
+  }
+});
+
+
 
 
 
