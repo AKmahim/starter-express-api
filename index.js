@@ -27,7 +27,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     'http://127.0.0.1:5500',
     'https://xri.com.bd',
-    'http://127.0.0.1:8000/'
+    'http://127.0.0.1:8000',
     // Add more allowed origins as needed
   ];
 
