@@ -26,6 +26,7 @@ const upload = multer({ storage });
 app.use((req, res, next) => {
   const allowedOrigins = [
     'http://127.0.0.1:5500',
+    'http://127.0.0.1:5501',
     'https://xri.com.bd',
     'http://127.0.0.1:8000',
     // Add more allowed origins as needed
