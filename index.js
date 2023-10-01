@@ -164,7 +164,11 @@ app.delete('/delete/:id', async (req, res) => {
     return res.status(500).json({ message: `Failed to delete image with ID ${fileId}.` });
   }
 });
+
+
 // ================== Route for storing JSON data ====================
+let objectList = [];
+
 app.post('/show-list', (req, res) => {
   const jsonData = req.body;
 
