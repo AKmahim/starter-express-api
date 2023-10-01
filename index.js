@@ -2,10 +2,14 @@ const express = require('express');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const AWS = require('aws-sdk');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+app.use(bodyParser.json());
 
 // Configure AWS SDK with your credentials and desired region
 AWS.config.update({
@@ -90,6 +94,9 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
+// ================== get all image ID as a list of object ====================
+
+
 app.get('/all-photo-ids', async (req, res) => {
   try {
     const listObjectsResponse = await s3.listObjectsV2({
@@ -110,6 +117,9 @@ app.get('/all-photo-ids', async (req, res) => {
     return res.status(500).json({ message: 'Failed to list photo IDs.' });
   }
 });
+
+// ================== route for delete all ====================
+
 
 app.delete('/delete-all', async (req, res) => {
   try {
@@ -136,6 +146,8 @@ app.delete('/delete-all', async (req, res) => {
     return res.status(500).json({ message: 'Failed to delete all images.' });
   }
 });
+
+// ================== route for delete image by id ====================
 app.delete('/delete/:id', async (req, res) => {
   const fileId = req.params.id;
   const fileName = `${fileId}.jpg`; // Assuming all images are in JPG format
@@ -152,6 +164,44 @@ app.delete('/delete/:id', async (req, res) => {
     return res.status(500).json({ message: `Failed to delete image with ID ${fileId}.` });
   }
 });
+// ================== Route for storing JSON data ====================
+app.post('/show-list', (req, res) => {
+  const jsonData = req.body;
+
+  try {
+    if (!jsonData.id || typeof jsonData.isShow !== 'boolean') {
+      return res.status(400).json({ message: 'Invalid data format. Expecting an object with "id" and "isShow" properties.' });
+    }
+
+    objectList.push(jsonData); // Add the received object to the list
+
+    // Upload the JSON data to S3
+    const uploadParams = {
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Key: `data/show-list.json`, // Adjust the folder path and filename as needed
+      Body: JSON.stringify(jsonData),
+      ContentType: 'application/json',
+    };
+
+    s3.upload(uploadParams, (err, data) => {
+      if (err) {
+        console.error('Error uploading JSON data to S3:', err);
+        return res.status(500).json({ message: 'Failed to upload JSON data to S3.' });
+      }
+
+      return res.json({ message: 'Object stored successfully.', objectList });
+    });
+  } catch (error) {
+    console.error('Error processing JSON data:', error);
+    return res.status(400).json({ message: 'Invalid JSON format in the request body or failed to upload to S3.' });
+  }
+});
+
+// ================== Route to retrieve the list of stored objects ====================
+app.get('/show-list', (req, res) => {
+  return res.json({ objectList });
+});
+
 
 
 
