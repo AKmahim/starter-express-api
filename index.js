@@ -209,7 +209,7 @@ app.get('/show-list', (req, res) => {
   const readObject = () => {
     const params = {
       Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
-      Key: `data/show-list.json`, // Adjust the folder path and filename as needed
+      Key: 'data/show-list.json', // Adjust the folder path and filename as needed
     };
 
     s3.getObject(params, (err, data) => {
