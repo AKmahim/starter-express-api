@@ -214,10 +214,13 @@ app.get('/show-list', (req, res) => {
 
     s3.getObject(params, (err, data) => {
       if (err) {
-        console.error('Error reading object:', err);
-        return res.status(500).json({ message: 'Failed to get JSON data to S3.' });
+        console.error('Error reading JSON file from S3:', err);
+        res.status(500).json({ error: 'Error reading JSON file from S3' });
       } else {
-        return res.status(200).json({ data });
+        const jsonContent = data.Body.toString('utf-8');
+        const jsonObject = JSON.parse(jsonContent);
+  
+        res.json(jsonObject);
       }
     });
   };
