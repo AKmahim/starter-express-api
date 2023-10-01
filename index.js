@@ -204,7 +204,24 @@ app.post('/show-list', (req, res) => {
 
 // ================== Route to retrieve the list of stored objects ====================
 app.get('/show-list', (req, res) => {
-  return res.json({ objectList });
+
+  // Read an object from the S3 bucket
+  const readObject = () => {
+    const params = {
+      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
+      Key: `data/show-list.json`, // Adjust the folder path and filename as needed
+    };
+
+    s3.getObject(params, (err, data) => {
+      if (err) {
+        console.error('Error reading object:', err);
+      } else {
+        return res.status(200).json({ data });
+      }
+    });
+  };
+
+  
 });
 
 
