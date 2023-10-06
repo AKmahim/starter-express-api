@@ -60,6 +60,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Get all photo list
+app.get('/', (req, res) => {
+  res.status(200).send('<h1>Server is Running</h1>');
+});
+
 
 // Define a route for uploading an image to S3
 app.post('/upload', upload.single('image'), async (req, res) => {
@@ -84,6 +89,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     return res.status(500).json({ message: 'Failed to upload image.' });
   }
 });
+
 
 // Define a route for retrieving an image from S3 by ID
 app.get('/image/:id', async (req, res) => {
