@@ -3,12 +3,13 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const AWS = require('aws-sdk');
 const bodyParser = require('body-parser');
+const { default: mongoose } = require('mongoose');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Configure AWS SDK with your credentials and desired region
@@ -24,6 +25,18 @@ const s3 = new AWS.S3();
 // Multer configuration for handling file uploads
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage });
+
+// mongoDB token 
+mongoURI = process.env.MONGODB_TOKEN ;
+
+// create connection with mongodb
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+  });
 
 
 // Enable CORS for specific origins
@@ -166,71 +179,104 @@ app.delete('/delete/:id', async (req, res) => {
 });
 
 
-// ================== Route for storing JSON data ====================
-let objectList = [];
+// ================== Route for storing total selected image data in JSON data ====================
 
-app.post('/show-list', (req, res) => {
-  const jsonData = req.body;
 
-  try {
-    if (!jsonData.id || typeof jsonData.isShow !== 'boolean') {
-      return res.status(400).json({ message: 'Invalid data format. Expecting an object with "id" and "isShow" properties.' });
-    }
+// =================== userend setup ===========
+// created new model to store data in mongodb
+const Task = mongoose.model('photo-list',{
+  photoId: String,
+  done: Boolean,
 
-    objectList.push(jsonData); // Add the received object to the list
+});
 
-    // Upload the JSON data to S3
-    const uploadParams = {
-      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
-      Key: `data/show-list.json`, // Adjust the folder path and filename as needed
-      Body: JSON.stringify(jsonData),
-      ContentType: 'application/json',
-    };
+// store data
+app.post('/photo-list',(req,res) => {
+  const {photoId , done} = req.body;
 
-    s3.upload(uploadParams, (err, data) => {
-      if (err) {
-        console.error('Error uploading JSON data to S3:', err);
-        return res.status(500).json({ message: 'Failed to upload JSON data to S3.' });
-      }
+  const task = new Task({
+    photoId,
+    done,
+    
 
-      return res.json({ message: 'Object stored successfully.', objectList });
+  });
+
+  task.save()
+    .then(()=>{
+      res.status(201).json(task);
+    })
+    .catch((err)=>{
+      res.status(400).send(err);
+    })
+
+
+})
+
+// Get all photo list
+app.get('/photo-list', (req, res) => {
+  Task.find()
+    .then((tasks) => {
+      res.json(tasks);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
     });
-  } catch (error) {
-    console.error('Error processing JSON data:', error);
-    return res.status(400).json({ message: 'Invalid JSON format in the request body or failed to upload to S3.' });
-  }
 });
 
 
-// ================== Route to retrieve the list of stored objects ====================
-app.get('/show-list', (req, res) => {
+// Update a photo-list by ID
+app.put('/photo-list/update/:id', (req, res) => {
+  const taskId = req.params.id;
+  const { photoId,done } = req.body;
 
-  // Read an object from the S3 bucket
-  const readObject = () => {
-    const params = {
-      Bucket: 'cyclic-dull-erin-caiman-vest-ap-southeast-2',
-      Key: 'data/show-list.json', // Adjust the folder path and filename as needed
-    };
-
-    s3.getObject(params, (err, data) => {
-      if (err) {
-        console.error('Error reading JSON file from S3:', err);
-        res.status(500).json({ error: 'Error reading JSON file from S3' });
-      } else {
-        const jsonContent = data.Body.toString('utf-8');
-        const jsonObject = JSON.parse(jsonContent);
-  
-        res.json(jsonObject);
+  Task.findByIdAndUpdate(taskId, { photoId, done }, { new: true })
+    .then((task) => {
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found' });
       }
+      res.json(task);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
     });
-  };
-
-  
 });
 
+// ====================== billboard api ==========
 
+// created new model to store data in mongodb
+const BillBoard = mongoose.model('billboard',{
+  photoId: String,
+  done: Boolean,
 
+});
 
+// Update a photo details by ID
+app.put('/billboard/update/:id', (req, res) => {
+  const taskId = req.params.id;
+  const { photoId, done } = req.body;
+
+  BillBoard.findByIdAndUpdate(taskId, { photoId, done }, { new: true })
+    .then((billboard) => {
+      if (!billboard) {
+        return res.status(404).json({ message: 'billboard photo deails not found' });
+      }
+      res.json(billboard);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+});
+
+// Get billboard photo details
+app.get('/billboard', (req, res) => {
+  BillBoard.find()
+    .then((billboard) => {
+      res.json(billboard);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+});
 
 
 app.listen(port, () => {
