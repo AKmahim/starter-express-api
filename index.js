@@ -13,12 +13,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Configure AWS SDK with your credentials and desired region
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-  sessionToken: process.env.AWS_SESSION_TOKEN
-});
+// AWS.config.update({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//   region: process.env.AWS_REGION,
+//   sessionToken: process.env.AWS_SESSION_TOKEN
+// });
 
 const s3 = new AWS.S3();
 
@@ -27,7 +27,7 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage });
 
 // mongoDB token 
-mongoURI = process.env.MONGODB_TOKEN ;
+mongoURI = process.env.MONGODB_TOKEN;
 
 // create connection with mongodb
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -190,28 +190,28 @@ app.delete('/delete/:id', async (req, res) => {
 
 // =================== userend setup ===========
 // created new model to store data in mongodb
-const Task = mongoose.model('photo-list',{
+const Task = mongoose.model('photo-list', {
   photoId: String,
   done: Boolean,
 
 });
 
 // store data
-app.post('/photo-list',(req,res) => {
-  const {photoId , done} = req.body;
+app.post('/photo-list', (req, res) => {
+  const { photoId, done } = req.body;
 
   const task = new Task({
     photoId,
     done,
-    
+
 
   });
 
   task.save()
-    .then(()=>{
+    .then(() => {
       res.status(201).json(task);
     })
-    .catch((err)=>{
+    .catch((err) => {
       res.status(400).send(err);
     })
 
@@ -233,7 +233,7 @@ app.get('/photo-list', (req, res) => {
 // Update a photo-list by ID
 app.put('/photo-list/update/:id', (req, res) => {
   const taskId = req.params.id;
-  const { photoId,done } = req.body;
+  const { photoId, done } = req.body;
 
   Task.findByIdAndUpdate(taskId, { photoId, done }, { new: true })
     .then((task) => {
@@ -250,7 +250,7 @@ app.put('/photo-list/update/:id', (req, res) => {
 // ====================== billboard api ==========
 
 // created new model to store data in mongodb
-const BillBoard = mongoose.model('billboard',{
+const BillBoard = mongoose.model('billboard', {
   photoId: String,
   done: Boolean,
 
