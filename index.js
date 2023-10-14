@@ -4,6 +4,9 @@ const { v4: uuidv4 } = require('uuid');
 const AWS = require('aws-sdk');
 const bodyParser = require('body-parser');
 const { default: mongoose } = require('mongoose');
+const qr = require('qr-image');
+
+
 require('dotenv').config();
 
 const app = express();
@@ -283,6 +286,37 @@ app.get('/billboard', (req, res) => {
       res.status(500).send(err);
     });
 });
+
+
+
+// ======================== generate qr code and return dataurl ===========
+app.post('/generate-qr-code', (req, res) => {
+  const { text } = req.body;
+
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required' });
+  }
+
+  try {
+    const qrCode = qr.image(text, { type: 'png', size: 10 });
+    const dataURL = qrCode.pipe(require('stream').PassThrough());
+    const chunks = [];
+
+    dataURL.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+
+    dataURL.on('end', () => {
+      const buffer = Buffer.concat(chunks);
+      const base64Data = buffer.toString('base64');
+      const dataURL = `data:image/png;base64,${base64Data}`;
+      res.json({ dataURL });
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'QR code generation failed' });
+  }
+});
+
 
 
 app.listen(port, () => {
