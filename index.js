@@ -48,6 +48,7 @@ app.use((req, res, next) => {
     'http://127.0.0.1:5500',
     'http://127.0.0.1:5501',
     'https://xri.com.bd',
+    'https://photobooth.alponayboishakh.com',
     'http://127.0.0.1:8000',
     // Add more allowed origins as needed
   ];
@@ -63,7 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Get all photo list
+// server status index page
 app.get('/', (req, res) => {
   res.status(200).send('<h1>Server is Running</h1>');
 });
